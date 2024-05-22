@@ -1,0 +1,65 @@
+﻿@page "/orders"
+@using InventoryBlazor.Models
+@inject HttpClient Http;
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+
+<h3>Order List</h3>
+
+@if (orders == null)
+{
+    <p>Loading...</p>
+}
+else if(orders.Count==0)
+{
+    <p>No orders found</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
+                    <td>
+                        <button @onclick="() => EditOrder(order.Id)" class="btn btn-primary">Edit</button>
+                        <button @onclick="() => DeleteOrder(order.Id)" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button @onclick="AddOrder" class="btn btn-success">Add New Order</button>
+}
+
+@code {
+    private List<Order> orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetOrdersAsync();
+    }
+
+    private void AddOrder()
+    {
+        Navigation.NavigateTo("/orders/add");
+    }
+
+    private void EditOrder(int id)
+    {
+        Navigation.NavigateTo($"/orders/edit/{id}");
+    }
+
+    private async Task DeleteOrder(int id)
+    {
+        await OrderService.DeleteOrderAsync(id);
+        orders = await OrderService.GetOrdersAsync(); // Refresh list
+    }
+}

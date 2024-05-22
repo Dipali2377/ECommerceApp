@@ -1,0 +1,52 @@
+﻿@page "/orders/add"
+@page "/orders/edit/{id:int}"
+@using InventoryBlazor.Models
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+
+<h3>@(isEditMode ? "Edit Order" : "Add Order")</h3>
+
+<EditForm Model="order" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="orderDate">Order Date</label>
+        <InputDate id="orderDate" class="form-control" @bind-Value="order.OrderDate" />
+    </div>
+    <button type="submit" class="btn btn-primary">@submitButtonText</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? id { get; set; }
+    private Order order = new Order();
+    private bool isEditMode => id.HasValue;
+    private string submitButtonText => isEditMode ? "Save Changes" : "Add Order";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (isEditMode)
+        {
+            order = await OrderService.GetOrderByIdAsync(id.Value);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isEditMode)
+        {
+            await OrderService.UpdateOrderAsync(order);
+        }
+        else
+        {
+            await OrderService.AddOrderAsync(order);
+        }
+        Navigation.NavigateTo("/orders");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/orders");
+    }
+}
