@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace InterviewCrudTask.Models;
-
-public partial class InventoryItem
+namespace InventoryBlazor.Models
 {
-    public int Id { get; set; }
+    public class InventoryItem
+    {
+        public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+        [Required(ErrorMessage = "Name is required")]
+        public string Name { get; set; } = null!;
 
-    public int Quantity { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Quantity cannot be negative")]
+        public int Quantity { get; set; }
 
-    public decimal Price { get; set; }
-
-    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        [Range(0, double.MaxValue, ErrorMessage = "Price cannot be negative")]
+        public decimal Price { get; set; }
+       
+    }
 }
