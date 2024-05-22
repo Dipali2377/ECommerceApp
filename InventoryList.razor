@@ -1,0 +1,69 @@
+﻿@page "/inventories"
+@using InventoryBlazor.Models
+@inject HttpClient Http;
+@inject InventoryService InventoryService
+@inject NavigationManager Navigation
+
+<h3>Inventory List</h3>
+
+@if (inventoryItems == null)
+{
+    <p>Loading...</p>
+}
+else if (inventoryItems.Count == 0)
+{
+    <p>No inventory items found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in inventoryItems)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>
+                        <button @onclick="() => EditItem(item.Id)" class="btn btn-primary">Edit</button>
+                        <button @onclick="() => DeleteItem(item.Id)" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button @onclick="AddItem" class="btn btn-success">Add New Item</button>
+}
+
+@code {
+    private List<InventoryItem> inventoryItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        inventoryItems = await InventoryService.GetInventoryItemsAsync();
+    }
+
+    private void AddItem()
+    {
+        Navigation.NavigateTo("/inventories/add");
+    }
+
+    private void EditItem(int id)
+    {
+        Navigation.NavigateTo($"/inventories/edit/{id}");
+    }
+
+    private async Task DeleteItem(int id)
+    {
+        await InventoryService.DeleteInventoryItemAsync(id);
+        inventoryItems = await InventoryService.GetInventoryItemsAsync(); // Refresh list
+    }
+}

@@ -1,0 +1,60 @@
+﻿@page "/inventories/add"
+@page "/inventories/edit/{id:int}"
+@using InventoryBlazor.Models
+@inject InventoryService InventoryService
+@inject NavigationManager Navigation
+
+<h3>@(isEditMode ? "Edit Inventory Item" : "Add Inventory Item")</h3>
+
+<EditForm Model="inventoryItem" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="inventoryItem.Name" />
+    </div>
+    <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <InputNumber id="quantity" class="form-control" @bind-Value="inventoryItem.Quantity" />
+    </div>
+    <div class="form-group">
+        <label for="price">Price</label>
+        <InputNumber id="price" class="form-control" @bind-Value="inventoryItem.Price" />
+    </div>
+    <button type="submit" class="btn btn-primary">@submitButtonText</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? id { get; set; }
+    private InventoryItem inventoryItem = new InventoryItem();
+    private bool isEditMode => id.HasValue;
+    private string submitButtonText => isEditMode ? "Save Changes" : "Add Item";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (isEditMode)
+        {
+            inventoryItem = await InventoryService.GetInventoryItemByIdAsync(id.Value);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isEditMode)
+        {
+            await InventoryService.UpdateInventoryItemAsync(inventoryItem);
+        }
+        else
+        {
+            await InventoryService.AddInventoryItemAsync(inventoryItem);
+        }
+        Navigation.NavigateTo("/inventories");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/inventories");
+    }
+}
